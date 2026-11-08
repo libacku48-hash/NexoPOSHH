@@ -4,6 +4,7 @@ use App\Jobs\CheckForUpdatesJob;
 use App\Jobs\ClearHoldOrdersJob;
 use App\Jobs\ClearModuleTempJob;
 use App\Jobs\DeleteExpiredOptionsJob;
+use App\Jobs\DetectExpiringBatchesJob;
 use App\Jobs\DetectLowStockProductsJob;
 use App\Jobs\DetectScheduledTransactionsJob;
 use App\Jobs\EnsureCombinedProductHistoryExistsJob;
@@ -81,6 +82,12 @@ if ( Helper::installed() ) {
      * low inventory to trigger a notification and an event.
      */
     Schedule::job( new DetectLowStockProductsJob )->dailyAt( '00:02' );
+
+    /**
+     * Will detect procurement lots that are about to expire (or already
+     * expired) and still have stock, to trigger a notification.
+     */
+    Schedule::job( new DetectExpiringBatchesJob )->dailyAt( '00:05' );
 
     /**
      * Will track orders saved with instalment and

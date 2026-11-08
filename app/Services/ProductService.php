@@ -1413,6 +1413,23 @@ class ProductService
             }
 
             /**
+             * FIFO batch handling for grouped product components: a sale
+             * consumes the oldest valid lots first, a void/return restores
+             * the lots that were consumed by that order product.
+             */
+            if ( $action === ProductHistory::ACTION_SOLD ) {
+                app()->make( ProductBatchService::class )->consumeFifo(
+                    product_id: $subItem->product_id,
+                    unit_id: $subItem->unit_id,
+                    quantity: $finalQuantity,
+                    order_id: $orderProduct->order_id ?? null,
+                    order_product_id: $orderProduct->id ?? null
+                );
+            } elseif ( in_array( $action, [ ProductHistory::ACTION_VOID_RETURN, ProductHistory::ACTION_RETURNED ] ) ) {
+                app()->make( ProductBatchService::class )->restoreForOrderProduct( $orderProduct->id );
+            }
+
+            /**
              * We would like to record for every sub product
              * included an history of the stock transaction.
              */
@@ -1522,6 +1539,23 @@ class ProductService
                 }
             }
 
+            /**
+             * FIFO batch handling: a sale without a specific lot consumes
+             * the oldest valid lots first; a void/return restores the lots
+             * consumed by that order product.
+             */
+            if ( $procurementProduct === null && $action === ProductHistory::ACTION_SOLD ) {
+                app()->make( ProductBatchService::class )->consumeFifo(
+                    product_id: $product_id,
+                    unit_id: $unit_id,
+                    quantity: abs( $quantity ),
+                    order_id: isset( $orderProduct ) ? $orderProduct->order_id : null,
+                    order_product_id: isset( $orderProduct ) ? $orderProduct->id : null
+                );
+            } elseif ( $procurementProduct === null && in_array( $action, [ ProductHistory::ACTION_VOID_RETURN, ProductHistory::ACTION_RETURNED ] ) && isset( $orderProduct ) ) {
+                app()->make( ProductBatchService::class )->restoreForOrderProduct( $orderProduct->id );
+            }
+
             return $this->recordStockHistory(
                 product_id: $product_id,
                 author: $author,
@@ -1567,6 +1601,17 @@ class ProductService
                     oldQuantity: $currentQuantity
                 );
             }
+
+            /**
+             * Keep the lots consistent with the new absolute quantity:
+             * missing stock is taken out of lots FIFO.
+             */
+            app()->make( ProductBatchService::class )->reconcileAfterSet(
+                product_id: $product_id,
+                unit_id: $unit_id,
+                old_quantity: $currentQuantity,
+                new_quantity: $quantity
+            );
 
             return $this->recordStockHistory(
                 product_id: $product_id,

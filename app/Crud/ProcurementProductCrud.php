@@ -179,6 +179,13 @@ class ProcurementProductCrud extends CrudService
                             'value' => $entry->expiration_date ?? '',
                             'description' => __( 'Define what is the expiration date of the product.' ),
                         ],
+                        [
+                            'type' => 'date',
+                            'name' => 'manufactured_date',
+                            'label' => __( 'Manufactured Date' ),
+                            'value' => $entry->manufactured_date ?? '',
+                            'description' => __( 'Define what is the manufacturing date of the product.' ),
+                        ],
                     ],
                 ],
             ],

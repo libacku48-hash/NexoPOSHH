@@ -11,6 +11,10 @@ Route::middleware( NsRestrictMiddleware::arguments( 'nexopos.read.products' ) )-
     Route::get( '/products/stock-adjustment', [ ProductsController::class, 'showStockAdjustment' ] )->name( ns()->routeName( 'ns.dashboard.products.stock-adjustment' ) );
     Route::get( '/products/stock-adjustment/{history}', [ ProductsController::class, 'showStockAdjustmentEdit' ] )->name( ns()->routeName( 'ns.dashboard.products.stock-adjustment.edit' ) );
     Route::get( '/products/adjustment-history', [ ProductsController::class, 'listAdjustmentHistory' ] )->name( ns()->routeName( 'ns.dashboard.products.adjustment-history' ) );
+    Route::get( '/products/stocktakes', [ ProductsController::class, 'listStocktakes' ] )->name( ns()->routeName( 'ns.dashboard.products.stocktakes' ) );
+    Route::get( '/products/stocktakes/create', [ ProductsController::class, 'showStocktake' ] )->name( ns()->routeName( 'ns.dashboard.products.stocktakes.create' ) );
+    Route::get( '/products/stocktakes/{stocktake}', [ ProductsController::class, 'showStocktakeEdit' ] )->name( ns()->routeName( 'ns.dashboard.products.stocktakes.edit' ) );
+    Route::get( '/products/batches', [ ProductsController::class, 'listProductBatches' ] )->name( ns()->routeName( 'ns.dashboard.products.batches' ) );
     Route::get( '/products/print-labels', [ ProductsController::class, 'printLabels' ] )->name( ns()->routeName( 'ns.dashboard.products.print-labels' ) );
     Route::get( '/products/edit/{product}', [ ProductsController::class, 'editProduct' ] )->name( ns()->routeName( 'ns.dashboard.products.edit' ) ); // @todo update
     Route::get( '/products/{product}/units', [ ProductsController::class, 'productUnits' ] )->name( ns()->routeName( 'ns.dashboard.products.units' ) );

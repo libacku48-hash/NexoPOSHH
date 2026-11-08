@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int    $tax_group_id
  * @property mixed  $barcode
  * @property Carbon $expiration_date
+ * @property Carbon|null $manufactured_date
  * @property mixed  $tax_type
  * @property float  $tax_value
  * @property float  $total_purchase_price
@@ -96,5 +97,43 @@ class ProcurementProduct extends NsModel
     public function scopeBarcode( $query, $barcode )
     {
         return $query->where( 'barcode', $barcode );
+    }
+
+    /**
+     * Lots with remaining stock.
+     */
+    public function scopeAvailable( $query )
+    {
+        return $query->where( 'available_quantity', '>', 0 );
+    }
+
+    /**
+     * Lots that can still be sold (no expiration date, or not expired yet).
+     */
+    public function scopeNotExpired( $query )
+    {
+        return $query->where( function ( $query ) {
+            $query->whereNull( 'expiration_date' )
+                ->orWhere( 'expiration_date', '>', Carbon::now() );
+        } );
+    }
+
+    /**
+     * Lots with remaining stock whose expiration date already passed.
+     */
+    public function scopeExpired( $query )
+    {
+        return $query->whereNotNull( 'expiration_date' )
+            ->where( 'expiration_date', '<=', Carbon::now() );
+    }
+
+    /**
+     * Lots with remaining stock expiring within the given days.
+     */
+    public function scopeExpiringWithin( $query, int $days )
+    {
+        return $query->whereNotNull( 'expiration_date' )
+            ->where( 'expiration_date', '>', Carbon::now() )
+            ->where( 'expiration_date', '<=', Carbon::now()->addDays( $days ) );
     }
 }

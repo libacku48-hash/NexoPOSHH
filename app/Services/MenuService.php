@@ -230,6 +230,8 @@ class MenuService
                     'nexopos.read.products-units',
                     'nexopos.create.products-units',
                     'nexopos.make.products-adjustments',
+                    'nexopos.read.stocktakes',
+                    'nexopos.read.product-batches',
                 ],
                 childrens: AsideMenu::childrens(
                     AsideMenu::subMenu(
@@ -297,6 +299,24 @@ class MenuService
                         identifier: 'products-adjustments-history',
                         permissions: [ 'nexopos.make.products-adjustments' ],
                         href: ns()->url( '/dashboard/products/adjustment-history' )
+                    ),
+                    AsideMenu::subMenu(
+                        label: __( 'Stocktakes' ),
+                        identifier: 'stocktakes',
+                        permissions: [ 'nexopos.read.stocktakes' ],
+                        href: ns()->url( '/dashboard/products/stocktakes' )
+                    ),
+                    AsideMenu::subMenu(
+                        label: __( 'Create Stocktake' ),
+                        identifier: 'create-stocktake',
+                        permissions: [ 'nexopos.create.stocktakes' ],
+                        href: ns()->url( '/dashboard/products/stocktakes/create' )
+                    ),
+                    AsideMenu::subMenu(
+                        label: __( 'Product Batches' ),
+                        identifier: 'product-batches',
+                        permissions: [ 'nexopos.read.product-batches' ],
+                        href: ns()->url( '/dashboard/products/batches' )
                     ),
                     AsideMenu::subMenu(
                         label: __( 'Scale Range' ),

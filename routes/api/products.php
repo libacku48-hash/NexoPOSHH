@@ -44,6 +44,14 @@ Route::get( 'products/adjustments/{adjustment}', [ ProductsController::class, 'g
 Route::put( 'products/adjustments/{adjustment}', [ ProductsController::class, 'updateDraftAdjustment' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.products' ) );
 Route::get( 'products/adjustments/{adjustment}/execute', [ ProductsController::class, 'executeAdjustment' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.products' ) );
 Route::delete( 'products/adjustments/{adjustment}', [ ProductsController::class, 'deleteDraftAdjustment' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.products' ) );
+Route::post( 'products/stocktakes/draft', [ ProductsController::class, 'saveDraftStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.create.stocktakes' ) );
+Route::get( 'products/stocktakes/{stocktake}', [ ProductsController::class, 'getStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.read.stocktakes' ) );
+Route::put( 'products/stocktakes/{stocktake}', [ ProductsController::class, 'updateDraftStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.stocktakes' ) );
+Route::get( 'products/stocktakes/{stocktake}/start-counting', [ ProductsController::class, 'startCountingStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.stocktakes' ) );
+Route::get( 'products/stocktakes/{stocktake}/approve', [ ProductsController::class, 'approveStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.approve.stocktakes' ) );
+Route::get( 'products/stocktakes/{stocktake}/cancel', [ ProductsController::class, 'cancelStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.stocktakes' ) );
+Route::delete( 'products/stocktakes/{stocktake}', [ ProductsController::class, 'deleteDraftStocktake' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.delete.stocktakes' ) );
+Route::get( 'products/batches/{batch}/write-off', [ ProductsController::class, 'writeOffBatch' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.write-off.product-batches' ) );
 Route::post( 'products/{identifier}/variations/{variation_id}', [ ProductsController::class, 'createSingleVariation' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.create.products' ) );
 Route::post( 'products/{product}/units/conversion', [ ProductsController::class, 'convertUnits' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.products' ) );
 Route::post( 'products/reorder', [ ProductsController::class, 'reorderProducts' ] )->middleware( NsRestrictMiddleware::arguments( 'nexopos.update.products' ) );

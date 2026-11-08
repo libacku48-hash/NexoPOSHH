@@ -10,10 +10,12 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Classes\Hook;
 use App\Crud\ProductAdjustmentCrud;
+use App\Crud\ProductBatchCrud;
 use App\Crud\ProductCrud;
 use App\Crud\ProductHistoryCrud;
 use App\Crud\ProductUnitQuantitiesCrud;
 use App\Crud\ScaleRangeCrud;
+use App\Crud\StocktakeCrud;
 use App\Crud\UnitCrud;
 use App\Exceptions\NotAllowedException;
 use App\Exceptions\NotFoundException;
@@ -26,13 +28,17 @@ use App\Models\ProductAdjustmentItem;
 use App\Models\ProductHistory;
 use App\Models\ProductUnitQuantity;
 use App\Models\ScaleRange;
+use App\Models\Stocktake;
 use App\Models\Unit;
 use App\Services\DateService;
 use App\Services\Helper;
 use App\Services\PosPinnedProductService;
+use App\Services\ProductBatchService;
 use App\Services\ProductService;
+use App\Services\StocktakeService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
@@ -41,7 +47,9 @@ class ProductsController extends DashboardController
     public function __construct(
         protected ProductService $productService,
         protected DateService $dateService,
-        protected PosPinnedProductService $pinnedProductService
+        protected PosPinnedProductService $pinnedProductService,
+        protected StocktakeService $stocktakeService,
+        protected ProductBatchService $batchService
     ) {
         // ...
     }
@@ -839,6 +847,184 @@ class ProductsController extends DashboardController
         return [
             'status' => 'success',
             'message' => __( 'The draft adjustment has been deleted.' ),
+        ];
+    }
+
+    /**
+     * Stocktakes (periodic inventory counting).
+     */
+
+    public function listStocktakes()
+    {
+        ns()->restrict( [ 'nexopos.read.stocktakes' ] );
+
+        return StocktakeCrud::table();
+    }
+
+    public function showStocktake( Request $request )
+    {
+        ns()->restrict( [ 'nexopos.read.stocktakes' ] );
+
+        $stocktake = null;
+
+        if ( $request->query( 'stocktake_id' ) ) {
+            $stocktake = Stocktake::with( 'items' )
+                ->where( 'id', $request->query( 'stocktake_id' ) )
+                ->first();
+        }
+
+        return View::make( 'pages.dashboard.products.stocktake', [
+            'title' => __( 'Stocktake' ),
+            'description' => __( 'Count the physical stock and compare it with the system quantities.' ),
+            'stocktake' => $stocktake,
+        ] );
+    }
+
+    public function showStocktakeEdit( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.read.stocktakes' ] );
+
+        return View::make( 'pages.dashboard.products.stocktake', [
+            'title' => __( 'Edit Stocktake' ),
+            'description' => __( 'Update the counted quantities.' ),
+            'stocktake' => $stocktake->load( 'items' ),
+        ] );
+    }
+
+    public function getStocktake( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.read.stocktakes' ] );
+
+        return $stocktake->load( 'items' );
+    }
+
+    public function saveDraftStocktake( Request $request )
+    {
+        ns()->restrict( [ 'nexopos.create.stocktakes' ] );
+
+        $validator = Validator::make( $request->all(), [
+            'products' => 'required|array',
+        ] );
+
+        if ( $validator->fails() ) {
+            throw new Exception( __( 'Unable to proceed as the request is not valid.' ) );
+        }
+
+        $stocktake = $this->stocktakeService->createDraft(
+            $request->input( 'products' ),
+            $request->input( 'title', '' ),
+            $request->input( 'description', '' )
+        );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake draft has been saved successfully.' ),
+            'data' => [ 'stocktake' => $stocktake ],
+        ];
+    }
+
+    public function updateDraftStocktake( Stocktake $stocktake, Request $request )
+    {
+        ns()->restrict( [ 'nexopos.update.stocktakes' ] );
+
+        $validator = Validator::make( $request->all(), [
+            'products' => 'required|array',
+        ] );
+
+        if ( $validator->fails() ) {
+            throw new Exception( __( 'Unable to proceed as the request is not valid.' ) );
+        }
+
+        $stocktake = $this->stocktakeService->updateDraft(
+            $stocktake,
+            $request->input( 'products' ),
+            $request->input( 'title', $stocktake->title ?? '' ),
+            $request->input( 'description', $stocktake->description ?? '' )
+        );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake draft has been updated successfully.' ),
+            'data' => [ 'stocktake' => $stocktake ],
+        ];
+    }
+
+    public function startCountingStocktake( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.update.stocktakes' ] );
+
+        $stocktake = $this->stocktakeService->startCounting( $stocktake );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake is now counting.' ),
+            'data' => [ 'stocktake' => $stocktake ],
+        ];
+    }
+
+    public function approveStocktake( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.approve.stocktakes' ] );
+
+        $stocktake = $this->stocktakeService->approve( $stocktake );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake has been approved and the differences have been applied to the stock.' ),
+            'data' => [ 'stocktake' => $stocktake ],
+        ];
+    }
+
+    public function cancelStocktake( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.update.stocktakes' ] );
+
+        $stocktake = $this->stocktakeService->cancel( $stocktake );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake has been canceled.' ),
+            'data' => [ 'stocktake' => $stocktake ],
+        ];
+    }
+
+    public function deleteDraftStocktake( Stocktake $stocktake )
+    {
+        ns()->restrict( [ 'nexopos.delete.stocktakes' ] );
+
+        if ( $stocktake->status === Stocktake::STATUS_APPROVED ) {
+            throw new NotAllowedException( __( 'Approved stocktakes cannot be deleted.' ) );
+        }
+
+        $stocktake->items()->delete();
+        $stocktake->delete();
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The stocktake has been deleted.' ),
+        ];
+    }
+
+    /**
+     * Product batches (procurement lots with expiration dates).
+     */
+
+    public function listProductBatches()
+    {
+        ns()->restrict( [ 'nexopos.read.product-batches' ] );
+
+        return ProductBatchCrud::table();
+    }
+
+    public function writeOffBatch( ProcurementProduct $batch )
+    {
+        ns()->restrict( [ 'nexopos.write-off.product-batches' ] );
+
+        $this->batchService->writeOffExpired( $batch, Auth::id() ?? 0 );
+
+        return [
+            'status' => 'success',
+            'message' => __( 'The expired batch has been written off.' ),
         ];
     }
 }

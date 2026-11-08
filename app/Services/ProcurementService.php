@@ -467,6 +467,7 @@ class ProcurementService
             $procurementProduct->tax_type = $procuredProduct[ 'tax_type' ];
             $procurementProduct->tax_value = $procuredProduct[ 'tax_value' ];
             $procurementProduct->expiration_date = $procuredProduct[ 'expiration_date' ] ?? null;
+            $procurementProduct->manufactured_date = $procuredProduct[ 'manufactured_date' ] ?? null;
             $procurementProduct->total_purchase_price = $procuredProduct[ 'total_purchase_price' ];
             $procurementProduct->convert_unit_id = $procuredProduct[ 'convert_unit_id' ] ?? null;
             $procurementProduct->unit_id = $procuredProduct[ 'unit_id' ];

@@ -25,6 +25,7 @@ class GeneralSettings extends SettingsPage
                 $this->getCurrencySettings(),
                 $this->getDateSettings(),
                 $this->getRegistrationSettings(),
+                $this->getInventorySettings(),
             )
         );
     }
@@ -235,6 +236,22 @@ class GeneralSettings extends SettingsPage
                     type: 'search-select',
                     options: Helper::kvToJsOptions( config( 'nexopos.timezones' ) ),
                     description: sprintf( __( 'Determine the default timezone of the store. Current Time: %s' ), ns()->date->getNowFormatted() ),
+                ),
+            )
+        );
+    }
+
+    public function getInventorySettings()
+    {
+        return SettingForm::tab(
+            label: __( 'Inventory' ),
+            identifier: 'inventory',
+            fields: SettingForm::fields(
+                FormInput::text(
+                    name: 'ns_stock_expiry_warning_days',
+                    value: ns()->option->get( 'ns_stock_expiry_warning_days', '7' ),
+                    label: __( 'Expiry Warning Days' ),
+                    description: __( 'Batches expiring within this many days are reported as "Expiring Soon" and included in the daily expiring batches notification. Default is 7 days.' ),
                 ),
             )
         );
