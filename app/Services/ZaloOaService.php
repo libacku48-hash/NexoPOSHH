@@ -27,6 +27,12 @@ use Throwable;
  * (ZALO_OA_ENABLED=true) hoặc đang dry-run (ZALO_OA_DRY_RUN=true, mặc định),
  * service chỉ ghi log và không gọi API thật.
  *
+ * Thứ tự ưu tiên cấu hình: options trong trang Cài đặt (POS Settings,
+ * tab Zalo OA, ns_zalo_*) được đọc trước; .env qua config/services.php
+ * chỉ là dự phòng khi chưa đặt trong Cài đặt. Nhờ vậy cấu hình .env
+ * hiện tại vẫn chạy được, và người dùng có thể đổi cấu hình ngay trên
+ * giao diện mà không cần sửa file .env trên máy chủ.
+ *
  * @see docs/zalo-oa.md
  */
 class ZaloOaService
@@ -41,9 +47,70 @@ class ZaloOaService
      */
     public const WEBHOOK_SIGNATURE_HEADER = 'X-ZEvent-Signature';
 
+    /**
+     * Ghi đè cấu hình trong bộ nhớ cho lần chạy hiện tại (vd. lệnh
+     * ns:zalo-test ép dry-run). Ghi đè này được ưu tiên cao nhất,
+     * trên cả options trong Cài đặt lẫn .env.
+     */
+    protected static array $overrides = [];
+
+    public static function overrideConfig( string $key, mixed $value ): void
+    {
+        static::$overrides[ $key ] = $value;
+    }
+
+    /**
+     * Đọc một giá trị cấu hình Zalo OA.
+     *
+     * Thứ tự ưu tiên: ghi đè trong bộ nhớ (vd. lệnh test) > options
+     * trong trang Cài đặt (ns_zalo_*) > .env qua config/services.php.
+     * Đọc options được bọc try/catch: khi bảng options chưa sẵn sàng
+     * (cài đặt mới, test unit không có DB), hệ thống lặng lẽ dùng
+     * .env thay vì làm gián đoạn luồng bán hàng.
+     */
+    private function configValue( string $key, mixed $default = null ): mixed
+    {
+        if ( array_key_exists( $key, static::$overrides ) ) {
+            return static::$overrides[ $key ];
+        }
+
+        try {
+            $option = ns()->option->get( 'ns_zalo_' . $key );
+        } catch ( Throwable $exception ) {
+            $option = null;
+        }
+
+        if ( $option !== null && $option !== '' ) {
+            return $option;
+        }
+
+        return config( 'services.zalo.' . $key, $default );
+    }
+
+    /**
+     * Đọc một giá trị cấu hình dạng bật/tắt.
+     *
+     * Options lưu dạng 'yes'/'no' (chuẩn của trang Cài đặt), còn .env
+     * lưu dạng bool — cả hai đều được chấp nhận.
+     */
+    private function configBool( string $key, bool $default ): bool
+    {
+        $value = $this->configValue( $key );
+
+        if ( $value === null || $value === '' ) {
+            return $default;
+        }
+
+        if ( is_bool( $value ) ) {
+            return $value;
+        }
+
+        return in_array( strtolower( (string) $value ), [ 'yes', 'true', '1', 'on' ], true );
+    }
+
     public function isEnabled(): bool
     {
-        return (bool) config( 'services.zalo.enabled', false );
+        return $this->configBool( 'enabled', false );
     }
 
     /**
@@ -60,7 +127,7 @@ class ZaloOaService
      */
     public function isWebhookEnforcementEnabled(): bool
     {
-        return (bool) config( 'services.zalo.webhook_enforce', false );
+        return $this->configBool( 'webhook_enforce', false );
     }
 
     /**
@@ -78,7 +145,7 @@ class ZaloOaService
      */
     public function verifyWebhookSignature( string $rawBody, ?string $signatureHeader ): array
     {
-        $secret = (string) config( 'services.zalo.secret', '' );
+        $secret = (string) $this->configValue( 'secret', '' );
 
         if ( $secret === '' ) {
             return [ 'valid' => false, 'reason' => 'secret_not_configured' ];
@@ -94,7 +161,7 @@ class ZaloOaService
             return [ 'valid' => false, 'reason' => 'invalid_json' ];
         }
 
-        $appId = (string) ( $payload[ 'app_id' ] ?? $payload[ 'data' ][ 'app_id' ] ?? config( 'services.zalo.app_id', '' ) );
+        $appId = (string) ( $payload[ 'app_id' ] ?? $payload[ 'data' ][ 'app_id' ] ?? $this->configValue( 'app_id', '' ) );
         $timestamp = (string) ( $payload[ 'timestamp' ] ?? $payload[ 'data' ][ 'timestamp' ] ?? '' );
 
         if ( $appId === '' || $timestamp === '' ) {
@@ -118,18 +185,18 @@ class ZaloOaService
 
     public function isDryRun(): bool
     {
-        return (bool) config( 'services.zalo.dry_run', true );
+        return $this->configBool( 'dry_run', true );
     }
 
     public function isConfigured(): bool
     {
-        return ! empty( config( 'services.zalo.oa_id' ) )
-            && ! empty( config( 'services.zalo.access_token' ) );
+        return ! empty( $this->configValue( 'oa_id' ) )
+            && ! empty( $this->configValue( 'access_token' ) );
     }
 
     public function getApiBaseUrl(): string
     {
-        return rtrim( (string) config( 'services.zalo.api_base_url', 'https://openapi.zalo.me' ), '/' );
+        return rtrim( (string) $this->configValue( 'api_base_url', 'https://openapi.zalo.me' ), '/' );
     }
 
     /**
@@ -313,9 +380,9 @@ class ZaloOaService
              * Zalo từ chối (api_error).
              */
             $response = Http::withHeaders( [
-                    'access_token' => (string) config( 'services.zalo.access_token' ),
+                    'access_token' => (string) $this->configValue( 'access_token' ),
                 ] )
-                ->timeout( (int) config( 'services.zalo.timeout', 10 ) )
+                ->timeout( (int) $this->configValue( 'timeout', 10 ) )
                 ->acceptJson()
                 ->post( $this->getApiBaseUrl() . self::MESSAGE_ENDPOINT, [
                     'recipient' => [ 'user_id' => $recipientId ],

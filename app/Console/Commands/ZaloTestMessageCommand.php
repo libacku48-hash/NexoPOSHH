@@ -31,17 +31,17 @@ class ZaloTestMessageCommand extends Command
     public function handle( ZaloOaService $zalo ): int
     {
         if ( ! $this->option( 'live' ) ) {
-            config( [ 'services.zalo.dry_run' => true ] );
+            ZaloOaService::overrideConfig( 'dry_run', true );
 
             $this->info( __( 'Zalo OA dry run: no message was actually sent.' ) );
         }
 
         if ( ! $zalo->isEnabled() ) {
-            $this->warn( __( 'Zalo OA is disabled. Set ZALO_OA_ENABLED=true to enable it.' ) );
+            $this->warn( __( 'Zalo OA is disabled. Enable it in POS Settings > Zalo OA.' ) );
         }
 
         if ( ! $zalo->isConfigured() ) {
-            $this->error( __( 'Zalo OA is not configured. Set ZALO_OA_ID and ZALO_OA_ACCESS_TOKEN first.' ) );
+            $this->error( __( 'Zalo OA is not configured. Set the OA ID and access token in POS Settings > Zalo OA first.' ) );
 
             return self::FAILURE;
         }

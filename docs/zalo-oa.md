@@ -63,7 +63,30 @@ như trước. Cách bật cưỡng chế an toàn:
    Từ lúc này, sự kiện không có chữ ký hoặc sai chữ ký sẽ bị trả 401 và
    không được xử lý; sự kiện thiếu secret cấu hình cũng bị trả 401.
 
-## Cấu hình (.env)
+## Cấu hình
+
+Có 2 cách cấu hình, giá trị nào đặt trong **Cài đặt giao diện** sẽ thắng:
+
+### Cách 1 (chính): Cài đặt giao diện
+
+Vào **Dashboard → Cài đặt → Cài đặt POS → tab Zalo OA** và điền:
+
+| Mục | Mặc định | Ghi chú |
+|---|---|---|
+| Bật Zalo OA | Tắt | Bật mới gửi tin |
+| Mã Zalo OA (OA ID) | — | Lấy trên trang quản trị OA (oa.zalo.me) |
+| Mã ứng dụng Zalo (App ID) | — | Trên developers.zalo.me, dùng để xác minh chữ ký webhook |
+| Access token Zalo OA | — | Ô mật khẩu; để trống khi lưu sẽ giữ nguyên giá trị cũ |
+| Mã bí mật Zalo OA (OA Secret) | — | Ô mật khẩu; dùng để xác minh chữ ký webhook |
+| Chạy thử (Dry Run) | Bật | Bật = chỉ ghi log, không gửi thật |
+| Bắt buộc xác minh chữ ký webhook | Tắt | Chỉ bật sau khi đã thấy log "signature verified" (xem bên dưới) |
+| Địa chỉ API Zalo OA | `https://openapi.zalo.me` | Giữ nguyên mặc định |
+| Thời gian chờ API (giây) | `10` | |
+
+### Cách 2 (dự phòng): file `.env`
+
+Nếu chưa đặt trong Cài đặt, hệ thống dùng giá trị trong `.env`
+(đọc qua `config/services.php`):
 
 ```env
 ZALO_OA_ENABLED=true
@@ -72,10 +95,17 @@ ZALO_OA_ID=123456789012345
 ZALO_OA_APP_ID=1234567890123456789
 ZALO_OA_WEBHOOK_ENFORCE=false   # true = trả 401 khi chữ ký webhook sai (chỉ bật sau khi đã kiểm chứng, xem bên dưới)
 ZALO_OA_ACCESS_TOKEN=<token lấy ở bước trên>
-ZALO_OA_SECRET=             # dự phòng, hiện chưa dùng để xác thực webhook
+ZALO_OA_SECRET=
 ZALO_OA_API_BASE_URL=https://openapi.zalo.me
 ZALO_OA_TIMEOUT=10
 ```
+
+Thứ tự ưu tiên: **Cài đặt giao diện → `.env`**. Nhờ vậy cấu hình
+`.env` hiện tại vẫn chạy được, và người dùng có thể đổi cấu hình ngay
+trên giao diện mà không cần sửa file trên máy chủ. Lưu ý: access token
+và OA secret lưu trong Cài đặt sẽ nằm trong bảng options của database
+(thay vì chỉ trong `.env` trên máy chủ) — vẫn không bao giờ được
+commit lên Git.
 
 Sau khi sửa `.env`, chạy `php artisan config:clear` (hoặc khởi động lại
 hàng đợi nếu dùng queue) rồi chạy migration để có cột lưu mã Zalo:
@@ -116,8 +146,8 @@ Kiểm tra log (`storage/logs/laravel.log`) sẽ thấy các dòng `Zalo OA: ...
 
 ## Chưa làm (bước tiếp theo)
 
-- **Giao diện trong dashboard**: trang cài đặt Zalo OA (nhập OA ID/token,
-  bật/tắt, xem log gửi) và ô nhập `zalo_user_id` trên form khách hàng.
+- **Ô nhập `zalo_user_id` trên form khách hàng** trong dashboard (hiện
+  liên kết bằng lệnh `ns:zalo-link-customer` hoặc từ sự kiện `follow`).
   Hiện tại cấu hình bằng `.env` và liên kết bằng lệnh artisan.
 - **Tự động refresh access token**: access token Zalo hết hạn sau một thời
   gian; cần job định kỳ dùng `refresh_token` để lấy token mới và lưu lại.
