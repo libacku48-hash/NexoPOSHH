@@ -1730,6 +1730,7 @@ class TransactionService
         $defaults = [
             'cash-payment' => [ $accounts['cash']->id, 'increase' ],
             'bank-payment' => [ $accounts['bank']->id, 'increase' ],
+            'vietqr-payment' => [ $accounts['bank']->id, 'increase' ],
             'account-payment' => [ $accounts['customer_deposits']->id, 'decrease' ],
         ];
 

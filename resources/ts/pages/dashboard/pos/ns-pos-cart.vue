@@ -43,7 +43,7 @@
                     <div :product-index="index" :key="product.barcode" class="product-item flex" v-for="(product, index) of products">
                         <div class="w-full lg:w-4/6 p-2 border border-l-0 border-t-0">
                             <div class="flex justify-between product-details mb-1">
-                                <h3 class="font-semibold">
+                                <h3 class="font-semibold text-base md:text-lg leading-snug break-words">
                                     {{ product.name }} &mdash; {{ product.unit_name }}
                                 </h3>
                                 <div class="-mx-1 flex product-options">
@@ -100,7 +100,7 @@
                             </div>
                         </div>
                         <div @click="changeQuantity( product, index )" :class="allowQuantityModification( product ) ? 'cursor-pointer ns-numpad-key' : ''" class="hidden lg:flex w-1/6 p-2 border-b items-center justify-center">
-                            <span v-if="allowQuantityModification( product )" class="border-b border-dashed border-secondary p-2">{{ displayProductQuantity( product ) }}</span>
+                            <span v-if="allowQuantityModification( product )" class="border-b border-dashed border-secondary px-4 py-3 text-xl font-bold">{{ displayProductQuantity( product ) }}</span>
                         </div>
                         <div class="hidden lg:flex w-1/6 p-2 border border-r-0 border-t-0 items-center justify-center">{{ nsCurrency( product.total_price ) }}</div>
                     </div>
@@ -165,8 +165,8 @@
                                 <template v-else>
                                     <td width="200" class="border p-2"></td>
                                 </template>
-                                <td width="200" class="border p-2">{{ __( 'Total' ) }}</td>
-                                <td width="200" class="border p-2 text-right">{{ nsCurrency( order.total ) }}</td>
+                                <td width="200" class="border p-2 font-bold text-base md:text-lg">{{ __( 'Total' ) }}</td>
+                                <td width="200" class="border p-2 text-right font-bold text-lg md:text-xl">{{ nsCurrency( order.total ) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -238,15 +238,22 @@
                                 </td>
                                 <td width="200" class="border p-2">
                                     <div class="flex justify-between w-full">
-                                        <span>{{ __( 'Total' ) }}</span>
-                                        <span>{{ nsCurrency( order.total ) }}</span>    
+                                        <span class="font-bold text-base md:text-lg">{{ __( 'Total' ) }}</span>
+                                        <span class="font-bold text-lg md:text-xl">{{ nsCurrency( order.total ) }}</span>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="h-16 flex flex-shrink-0 border-t border-box-edge" id="cart-bottom-buttons">
+                <div class="flex flex-shrink-0 items-center justify-between px-3 py-2 border-t" :class="orderStatus.classes">
+                    <span class="inline-flex items-center gap-2 font-bold text-base md:text-lg">
+                        <span class="inline-block w-3 h-3 rounded-full" :class="orderStatus.dot"></span>
+                        <span>{{ orderStatus.label }}</span>
+                    </span>
+                    <span class="font-bold text-lg md:text-2xl">{{ __( 'Remaining to Collect' ) }}: {{ nsCurrency( remainingAmount ) }}</span>
+                </div>
+                <div class="h-20 flex flex-shrink-0 border-t border-box-edge" id="cart-bottom-buttons">
                     <template v-for="button of (new Array(4)).fill()" v-if="Object.keys( cartButtons ).length === 0"> 
                         <div :class="takeRandomClass()" class="animate-pulse flex-shrink-0 w-1/4 flex items-center font-bold cursor-pointer justify-center  border-r  flex-auto">
                             <i class="mx-4 rounded-full bg-slate-300 h-5 w-5"></i>
@@ -343,6 +350,35 @@ export default {
     computed: {
         selectedType() {
             return this.order.type ? this.order.type.label : 'N/A';
+        },
+        /**
+         * Amount still to collect on this order.
+         */
+        remainingAmount() {
+            if ( ! this.order || ! this.order.total ) {
+                return 0;
+            }
+            return Math.max( 0, this.order.total - ( this.order.tendered || 0 ) );
+        },
+        /**
+         * Order status shown as a colored pill with a text label, so the
+         * cashier can tell the order state at a glance (color + text,
+         * not color alone). Purely presentational: no business logic.
+         */
+        orderStatus() {
+            if ( ! this.order || ! this.order.total ) {
+                return { label: __( 'New Order' ), classes: 'bg-gray-100 text-gray-700', dot: 'bg-gray-400' };
+            }
+            if ( this.order.payment_status === 'hold' ) {
+                return { label: __( 'Hold' ), classes: 'bg-blue-100 text-blue-800', dot: 'bg-blue-500' };
+            }
+            if ( this.order.tendered >= this.order.total ) {
+                return { label: __( 'Paid' ), classes: 'bg-green-100 text-green-800', dot: 'bg-green-500' };
+            }
+            if ( this.order.tendered > 0 ) {
+                return { label: __( 'Partially Paid' ), classes: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500' };
+            }
+            return { label: __( 'Waiting for Payment' ), classes: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500' };
         },
         isVisible() {
             return this.visibleSection === 'cart';

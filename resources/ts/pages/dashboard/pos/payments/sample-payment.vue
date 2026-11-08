@@ -2,23 +2,23 @@
     <div class="h-full w-full py-2">
         <div class="px-2 pb-2" v-if="order">
             <div class="grid grid-cols-2 gap-2">
-                <div id="details" class="h-16 flex justify-between items-center border elevation-surface info text-xl md:text-3xl p-2">
+                <div id="details" class="h-20 flex justify-between items-center border elevation-surface info text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Total' ) }} : </span>
                     <span>{{ nsCurrency( order.total ) }}</span>
                 </div>
-                <div id="discount" @click="toggleDiscount()" class="cursor-pointer h-16 flex justify-between items-center border elevation-surface error text-xl md:text-3xl p-2">
+                <div id="discount" @click="toggleDiscount()" class="cursor-pointer h-20 flex justify-between items-center border elevation-surface error text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Discount' ) }} : </span>
                     <span>{{ nsCurrency( order.discount ) }}</span>
                 </div>
-                <div id="paid" class="h-16 flex justify-between items-center border elevation-surface success text-xl md:text-3xl p-2">
+                <div id="paid" class="h-20 flex justify-between items-center border elevation-surface success text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Paid' ) }} : </span>
                     <span>{{ nsCurrency( order.tendered ) }}</span>
                 </div>
-                <div id="change" class="h-16 flex justify-between items-center border elevation-surface warning text-xl md:text-3xl p-2">
+                <div id="change" class="h-20 flex justify-between items-center border elevation-surface warning text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Change' ) }} : </span>
                     <span>{{ nsCurrency( order.change ) }}</span>
                 </div>
-                <div id="change" class="col-span-2 h-16 flex justify-between items-center elevation-surface border text-xl md:text-3xl p-2">
+                <div id="change" class="col-span-2 h-20 flex justify-between items-center elevation-surface border text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Screen' ) }} : </span>
                     <span>{{ nsCurrency( backValue / number ) }}</span>
                 </div>
@@ -33,13 +33,13 @@
                             :key="index"
                             v-for="(key,index) of keys"
                             style="margin:-1px;"
-                            class="ns-numpad-key text-2xl border h-16 flex items-center justify-center cursor-pointer">
+                            class="ns-numpad-key text-2xl border h-20 flex items-center justify-center cursor-pointer">
                             <span v-if="key.value !== undefined">{{ key.value }}</span>
                             <i v-if="key.icon" class="las" :class="key.icon"></i>
                         </div>
                         <div
                             @click="makeFullPayment()"
-                            class="hover:bg-green-500 col-span-3 bg-success-secondary border-success-tertiary text-2xl text-white border h-16 flex items-center justify-center cursor-pointer">
+                            class="hover:bg-green-500 col-span-3 bg-success-secondary border-success-tertiary text-2xl text-white border h-20 flex items-center justify-center cursor-pointer">
                             {{ __( 'Full Payment' ) }}</div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                         <div
                             v-for="(amount, index) of amountShortcuts" :key="index"
                             @click="increaseBy({ value : amount })"
-                            class="ns-numpad-key text-2xl border h-16 flex items-center justify-center cursor-pointer">
+                            class="ns-numpad-key text-2xl border h-20 flex items-center justify-center cursor-pointer">
                             <span>{{ nsCurrency( amount ) }}</span>
                         </div>
                     </div>

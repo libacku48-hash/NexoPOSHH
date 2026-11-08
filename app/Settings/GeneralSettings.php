@@ -121,6 +121,24 @@ class GeneralSettings extends SettingsPage
             label: __( 'Currency' ),
             identifier: 'currency',
             fields: SettingForm::fields(
+                FormInput::select(
+                    name: 'ns_currency_preset',
+                    value: ns()->option->get( 'ns_currency_preset', 'custom' ),
+                    options: [
+                        [
+                            'label' => __( 'Custom' ),
+                            'value' => 'custom',
+                        ], [
+                            'label' => __( 'US Dollar (USD)' ),
+                            'value' => 'usd',
+                        ], [
+                            'label' => __( 'Vietnamese Dong (VND)' ),
+                            'value' => 'vnd',
+                        ],
+                    ],
+                    label: __( 'Currency Preset' ),
+                    description: __( 'Choose a preset to fill in the currency settings below. You can still adjust each field manually afterwards.' ),
+                ),
                 FormInput::text(
                     name: 'ns_currency_symbol',
                     value: ns()->option->get( 'ns_currency_symbol' ),

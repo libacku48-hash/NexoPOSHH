@@ -37,19 +37,19 @@
                                 <i v-else="! product.galleries || product.galleries.filter( i => i.featured ).length === 0" class="las la-image text-6xl"></i>
                             </div>
                             <div class="w-full absolute z-10 -bottom-10">
-                                <div class="cell-item-label relative w-full flex flex-col items-center justify-center -top-10 h-20 p-2">
-                                    <h3 class="text-sm text-center w-full">{{ product.name }}</h3>
+                                <div :class="options.ns_pos_show_preview_pinned_products ? 'h-24' : 'h-20'" class="cell-item-label relative w-full flex flex-col items-center justify-center -top-10 p-2">
+                                    <h3 class="text-base leading-snug break-words text-center w-full">{{ product.name }}</h3>
                                     <template v-if="product.unit_quantities && product.unit_quantities.length === 1">
                                         <template v-if="options.ns_pos_vat === 'disabled'">
-                                            <span class="text-sm" v-if="product.unit_quantities && product.unit_quantities.length === 1">
+                                            <span class="text-base" v-if="product.unit_quantities && product.unit_quantities.length === 1">
                                                 {{ nsCurrency( product.unit_quantities[0].sale_price ) }}
                                             </span>
                                         </template>
                                         <template v-else>
-                                            <span v-if="options.ns_pos_prefered_price === 'gross_prices'" class="text-sm">
+                                            <span v-if="options.ns_pos_prefered_price === 'gross_prices'" class="text-base">
                                                 {{ nsCurrency( product.unit_quantities[0].sale_price_gross ) }}
                                             </span>
-                                            <span v-else class="text-sm">
+                                            <span v-else class="text-base">
                                                 {{ nsCurrency( product.unit_quantities[0].sale_price_net ) }}
                                             </span>
                                         </template>
@@ -69,8 +69,8 @@
                             <i class="las la-image text-6xl" v-if="! category.preview_url"></i>
                         </div>
                         <div class="w-full absolute z-10 -bottom-10">
-                            <div class="cell-item-label relative w-full flex items-center justify-center -top-10 h-20 py-2">
-                                <h3 class="text-sm font-bold py-2 text-center">{{ category.name }}</h3>
+                            <div class="cell-item-label relative w-full flex items-center justify-center -top-10 h-24 py-2">
+                                <h3 class="text-base leading-snug break-words font-bold py-2 text-center">{{ category.name }}</h3>
                             </div>
                         </div>
                     </div>
@@ -94,19 +94,19 @@
                             <i v-else="! product.galleries || product.galleries.filter( i => i.featured ).length === 0" class="las la-image text-6xl"></i>
                         </div>
                         <div class="w-full absolute z-10 -bottom-10">
-                            <div class="cell-item-label relative w-full flex flex-col items-center justify-center -top-10 h-20 p-2">
-                                <h3 class="text-sm text-center w-full">{{ product.name }}</h3>
+                            <div class="cell-item-label relative w-full flex flex-col items-center justify-center -top-10 h-24 p-2">
+                                <h3 class="text-base leading-snug break-words text-center w-full">{{ product.name }}</h3>
                                 <template v-if="product.unit_quantities && product.unit_quantities.length === 1">
                                     <template v-if="options.ns_pos_vat === 'disabled'">
-                                        <span class="text-sm" v-if="product.unit_quantities && product.unit_quantities.length === 1">
+                                        <span class="text-base" v-if="product.unit_quantities && product.unit_quantities.length === 1">
                                             {{ nsCurrency( product.unit_quantities[0].sale_price ) }}
                                         </span>
                                     </template>
                                     <template v-else>
-                                        <span v-if="options.ns_pos_prefered_price === 'gross_prices'" class="text-sm">
+                                        <span v-if="options.ns_pos_prefered_price === 'gross_prices'" class="text-base">
                                             {{ nsCurrency( product.unit_quantities[0].sale_price_gross ) }}
                                         </span>
-                                        <span v-else class="text-sm">
+                                        <span v-else class="text-base">
                                             {{ nsCurrency( product.unit_quantities[0].sale_price_net ) }}
                                         </span>
                                     </template>

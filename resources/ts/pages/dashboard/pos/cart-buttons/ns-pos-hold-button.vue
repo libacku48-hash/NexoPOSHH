@@ -1,6 +1,6 @@
 <template>
     <div @click="holdOrder()" id="hold-button" class="flex-shrink-0 w-1/4 flex items-center font-bold cursor-pointer justify-center bg-blue-500 text-white border-r hover:bg-blue-600 border-blue-600 flex-auto">
-        <i class="mr-2 text-2xl lg:text-xl las la-pause"></i> 
+        <i class="mr-2 text-3xl lg:text-2xl las la-pause"></i>
         <span class="text-lg hidden md:inline lg:text-2xl">{{ __( 'Hold' ) }}</span>
     </div>
 </template>

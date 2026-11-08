@@ -7,6 +7,7 @@ import CashPayment from "~/pages/dashboard/pos/payments/cash-payment.vue";
 import CreditCardPayment from "~/pages/dashboard/pos/payments/creditcard-payment.vue";
 import BankPayment from '~/pages/dashboard/pos/payments/bank-payment.vue';
 import AccountPayment from '~/pages/dashboard/pos/payments/account-payment.vue';
+import VietQrPayment from '~/pages/dashboard/pos/payments/vietqr-payment.vue';
 import nsPosLoadingPopupVue from './ns-pos-loading-popup.vue';
 import samplePaymentVue from '~/pages/dashboard/pos/payments/sample-payment.vue';
 import nsSelectPopupVue from './ns-select-popup.vue';
@@ -36,6 +37,17 @@ export default {
         expectedPayment() {
             const minimalPaymentPercent     =   this.order.customer.group.minimal_credit_payment;
             return ( this.order.total * minimalPaymentPercent ) / 100;
+        },
+        /**
+         * Amount still to collect on this order, shown big at the top of
+         * the payment popup so the cashier always sees what is due,
+         * whatever the selected payment type is.
+         */
+        remainingAmount() {
+            if ( ! this.order ) {
+                return 0;
+            }
+            return Math.max( 0, this.order.total - this.order.tendered );
         }
     },
     mounted() {
@@ -86,6 +98,9 @@ export default {
                 break;
                 case 'account-payment':
                     this.currentPaymentComponent    =   shallowRef( AccountPayment );
+                break;
+                case 'vietqr-payment':
+                    this.currentPaymentComponent    =   shallowRef( VietQrPayment );
                 break;
                 default: 
                     this.currentPaymentComponent    =   shallowRef( samplePaymentVue );
@@ -226,8 +241,8 @@ export default {
                 <h3 class="lg:hidden text-xl text-center my-4 font-bold lg:my-8">{{ __( 'Gateway' ) }} <span v-if="activePayment">: {{ activePayment.label }}</span></h3>
                 <div class="h-16 hidden lg:block"></div>
                 <ul class="hidden lg:block">
-                    <li @click="select( payment )" v-for="payment of paymentsType" :class="payment.selected && ! showPayment ? 'ns-visible' : ''" :key="payment.identifier" class="cursor-pointer ns-payment-gateway py-2 px-3">{{ payment.label }}</li>
-                    <li v-if="paymentsType.length > 0" @click="showPayment = true" :class="showPayment ? 'ns-visible' : ''" class="cursor-pointer py-2 px-3 ns-payment-list border-t mt-4 flex items-center justify-between">
+                    <li @click="select( payment )" v-for="payment of paymentsType" :class="payment.selected && ! showPayment ? 'ns-visible' : ''" :key="payment.identifier" class="cursor-pointer ns-payment-gateway py-3 px-3 text-lg break-words">{{ payment.label }}</li>
+                    <li v-if="paymentsType.length > 0" @click="showPayment = true" :class="showPayment ? 'ns-visible' : ''" class="cursor-pointer py-3 px-3 text-lg ns-payment-list border-t mt-4 flex items-center justify-between">
                         <span>{{ __( 'Payment List' ) }}</span>
                         <span class="px-2 rounded-full h-8 w-8 flex items-center justify-center ns-label">{{ order.payments.length }}</span>
                     </li> 
@@ -243,6 +258,10 @@ export default {
                         <div class="px-2">
                             <ns-close-button @click="closePopup()"></ns-close-button>
                         </div>
+                    </div>
+                    <div v-if="! showPayment && activePayment" class="px-3 py-2 flex justify-between items-center border-b text-xl md:text-2xl font-bold">
+                        <span>{{ __( 'Remaining to Collect' ) }}</span>
+                        <span>{{ nsCurrency( remainingAmount ) }}</span>
                     </div>
                     <div class="flex flex-auto ns-payment-wrapper overflow-y-auto" v-if="! showPayment && activePayment">
                         <component 
@@ -279,17 +298,17 @@ export default {
                     </div>
                 </div>
                 <div v-if="activePayment" class="flex lg:hidden ns-payment-buttons">
-                    <button @click="selectPayment()" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-12 font-bold ns-payment-type-button">
-                        <span class="text-sm">{{ __( 'Payment Type' ) }}</span>
+                    <button @click="selectPayment()" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-14 font-bold ns-payment-type-button">
+                        <span class="text-base">{{ __( 'Payment Type' ) }}</span>
                     </button>
-                    <button v-if="order.tendered >= order.total" @click="submitOrder()" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-12 ns-submit-button font-bold">
-                        <span class="text-sm">{{ __( 'Submit Payment' ) }}</span>
+                    <button v-if="order.tendered >= order.total" @click="submitOrder()" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-14 ns-submit-button font-bold">
+                        <span class="text-base">{{ __( 'Submit Payment' ) }}</span>
                     </button>
-                    <button v-if="order.tendered < order.total" @click="submitOrder({ payment_status: 'unpaid' })" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-12 ns-layaway-button font-bold">
-                        <span class="text-sm">{{ __( 'Layaway' ) }}</span>
+                    <button v-if="order.tendered < order.total" @click="submitOrder({ payment_status: 'unpaid' })" class="flex items-center justify-center w-1/3 text-2xl flex-auto h-14 ns-layaway-button font-bold">
+                        <span class="text-base">{{ __( 'Layaway' ) }}</span>
                     </button>
-                    <button @click="showPayment = true" class="w-1/3 flex ns-payment-button text-2xl flex-auto h-12 items-center justify-center font-bold">
-                        <span class="text-sm mr-1">{{ __( 'Payment List' ) }}</span>
+                    <button @click="showPayment = true" class="w-1/3 flex ns-payment-button text-2xl flex-auto h-14 items-center justify-center font-bold">
+                        <span class="text-base mr-1">{{ __( 'Payment List' ) }}</span>
                         <span class="px-2 rounded-full h-6 w-6 text-xs flex items-center justify-center ns-label">{{ order.payments.length }}</span>
                     </button>
                 </div>

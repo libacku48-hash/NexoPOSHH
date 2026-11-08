@@ -20,6 +20,7 @@ class PosSettings extends SettingsPage
             'printing' => include ( dirname( __FILE__ ) . '/pos/printing.php' ),
             'kitchen' => include ( dirname( __FILE__ ) . '/pos/kitchen.php' ),
             'zalo' => include ( dirname( __FILE__ ) . '/pos/zalo.php' ),
+            'vietqr' => include ( dirname( __FILE__ ) . '/pos/vietqr.php' ),
             'registers' => include ( dirname( __FILE__ ) . '/pos/registers.php' ),
             'vat' => include ( dirname( __FILE__ ) . '/pos/vat.php' ),
             'shortcuts' => include ( dirname( __FILE__ ) . '/pos/shortcuts.php' ),

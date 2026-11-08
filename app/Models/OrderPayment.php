@@ -28,6 +28,8 @@ class OrderPayment extends NsModel
 
     const PAYMENT_BANK = 'bank-payment';
 
+    const PAYMENT_VIETQR = 'vietqr-payment';
+
     public $dispatchesEvents = [
         'created' => OrderPaymentAfterCreatedEvent::class,
         'updated' => OrderPaymentAfterUpdatedEvent::class,

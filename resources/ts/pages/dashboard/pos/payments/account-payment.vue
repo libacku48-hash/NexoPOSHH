@@ -2,27 +2,27 @@
     <div class="h-full w-full py-2">
         <div class="px-2 pb-2" v-if="order">
             <div class="grid grid-cols-2 gap-2">
-                <div id="details" class="h-16 flex justify-between items-center text-white elevation-surface border info text-xl md:text-3xl p-2">
+                <div id="details" class="h-20 flex justify-between items-center text-white elevation-surface border info text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Total' ) }} : </span>
                     <span>{{ nsCurrency( order.total ) }}</span>
                 </div>
-                <div id="discount" @click="toggleDiscount()" class="cursor-pointer h-16 flex justify-between items-center text-white elevation-surface error border text-xl md:text-3xl p-2">
+                <div id="discount" @click="toggleDiscount()" class="cursor-pointer h-20 flex justify-between items-center text-white elevation-surface error border text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Discount' ) }} : </span>
                     <span>{{ nsCurrency( order.discount ) }}</span>
                 </div>
-                <div id="paid" class="h-16 flex justify-between items-center text-white elevation-surface success border text-xl md:text-3xl p-2">
+                <div id="paid" class="h-20 flex justify-between items-center text-white elevation-surface success border text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Paid' ) }} : </span>
                     <span>{{ nsCurrency( order.tendered ) }}</span>
                 </div>
-                <div id="change" class="h-16 flex justify-between items-center text-white elevation-surface warning border text-xl md:text-3xl p-2">
+                <div id="change" class="h-20 flex justify-between items-center text-white elevation-surface warning border text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Change' ) }} : </span>
                     <span>{{ nsCurrency( order.change ) }}</span>
                 </div>
-                <div id="current-balance" class="col-span-2 h-16 flex justify-between items-center text-white elevation-surface border success text-xl md:text-3xl p-2">
+                <div id="current-balance" class="col-span-2 h-20 flex justify-between items-center text-white elevation-surface border success text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Current Balance' ) }} : </span>
                     <span>{{ nsCurrency( order.customer.account_amount ) }}</span>
                 </div>
-                <div id="screen" class="col-span-2 h-16 flex justify-between items-center text-white! elevation-surface border text-xl md:text-3xl p-2">
+                <div id="screen" class="col-span-2 h-20 flex justify-between items-center text-white! elevation-surface border text-2xl md:text-4xl font-bold p-2">
                     <span>{{ __( 'Screen' ) }} : </span>
                     <span>{{ nsCurrency( screenValue ) }}</span>
                 </div>
@@ -35,7 +35,7 @@
                         <template v-slot:numpad-footer>
                             <div
                             @click="makeFullPayment()"
-                            class="hover:bg-success-tertiary col-span-3 bg-success-secondary text-2xl text-white border border-success-secondary h-16 flex items-center justify-center cursor-pointer">
+                            class="hover:bg-success-tertiary col-span-3 bg-success-secondary text-2xl text-white border border-success-secondary h-20 flex items-center justify-center cursor-pointer">
                             {{ __( 'Full Payment' ) }}</div>
                         </template>
                     </ns-numpad>
@@ -44,17 +44,17 @@
                     <div class="grid grid-flow-row grid-rows-1 gap-2">
                         <div 
                             @click="increaseBy({ value : 100 })"
-                            class="elevation-surface border hoverable text-2xl text-fontcolor h-16 flex items-center justify-center cursor-pointer">
+                            class="elevation-surface border hoverable text-2xl text-fontcolor h-20 flex items-center justify-center cursor-pointer">
                             <span>{{ nsCurrency( 100 ) }}</span>
                         </div>
                         <div 
                             @click="increaseBy({ value : 500 })"
-                            class="elevation-surface border hoverable text-2xl text-fontcolor h-16 flex items-center justify-center cursor-pointer">
+                            class="elevation-surface border hoverable text-2xl text-fontcolor h-20 flex items-center justify-center cursor-pointer">
                             <span >{{ nsCurrency( 500 ) }}</span>
                         </div>
                         <div 
                             @click="increaseBy({ value : 1000 })"
-                            class="elevation-surface border hoverable text-2xl text-fontcolor h-16 flex items-center justify-center cursor-pointer">
+                            class="elevation-surface border hoverable text-2xl text-fontcolor h-20 flex items-center justify-center cursor-pointer">
                             <span >{{ nsCurrency( 1000 ) }}</span>
                         </div>
                     </div>
